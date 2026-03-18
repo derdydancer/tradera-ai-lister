@@ -62,6 +62,13 @@ async function startServer() {
   const readData = () => JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
   const writeData = (data: any) => fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 
+  const JOBS_FILE = path.join(DATA_DIR, 'jobs.json');
+  if (!fs.existsSync(JOBS_FILE)) {
+    fs.writeFileSync(JOBS_FILE, JSON.stringify([]));
+  }
+  const readJobs = () => JSON.parse(fs.readFileSync(JOBS_FILE, 'utf-8'));
+  const writeJobs = (data: any) => fs.writeFileSync(JOBS_FILE, JSON.stringify(data, null, 2));
+
   // API Routes
   app.get('/api/ads', (req, res) => {
     res.json(readData());
@@ -108,6 +115,124 @@ async function startServer() {
     res.json({
       geminiApiKey: process.env.GEMINI_API_KEY || '',
     });
+  });
+
+  // Jobs Endpoints
+  app.get('/api/jobs', (req, res) => {
+    res.json(readJobs());
+  });
+
+  app.post('/api/jobs', (req, res) => {
+    const jobs = req.body.jobs || [req.body];
+    const currentJobs = readJobs();
+    const newJobs = jobs.map((j: any) => ({
+      ...j,
+      id: uuidv4(),
+      status: 'pending',
+      retries: 0,
+      nextRunAt: Date.now(),
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    }));
+    writeJobs([...currentJobs, ...newJobs]);
+    res.json({ success: true, jobs: newJobs });
+  });
+
+  app.post('/api/jobs/claim', (req, res) => {
+    const jobs = readJobs();
+    const now = Date.now();
+    
+    let changed = false;
+    jobs.forEach((j: any) => {
+      // Reset stuck jobs (processing for > 5 minutes)
+      if (j.status === 'processing' && now - j.updatedAt > 5 * 60 * 1000) {
+        j.status = 'pending';
+        j.updatedAt = now;
+        changed = true;
+      }
+    });
+
+    const jobIndex = jobs.findIndex((j: any) => j.status === 'pending' && j.nextRunAt <= now);
+    
+    if (jobIndex === -1) {
+      if (changed) writeJobs(jobs);
+      return res.json({ job: null });
+    }
+    
+    const job = jobs[jobIndex];
+    job.status = 'processing';
+    job.updatedAt = now;
+    writeJobs(jobs);
+    
+    res.json({ job });
+  });
+
+  app.post('/api/jobs/:id/success', (req, res) => {
+    const jobs = readJobs();
+    const job = jobs.find((j: any) => j.id === req.params.id);
+    if (job) {
+      job.status = 'completed';
+      job.result = req.body.result;
+      job.updatedAt = Date.now();
+      writeJobs(jobs);
+      
+      const ads = readData();
+      const adIndex = ads.findIndex((a: any) => a.id === job.adId);
+      if (adIndex !== -1) {
+        if (job.type === 'generate') {
+          ads[adIndex] = { ...ads[adIndex], ...req.body.result };
+        } else if (job.type === 'research') {
+          ads[adIndex].ResearchReport = req.body.result.report;
+        }
+        writeData(ads);
+      }
+    }
+    res.json({ success: true });
+  });
+
+  app.post('/api/jobs/:id/error', (req, res) => {
+    const jobs = readJobs();
+    const job = jobs.find((j: any) => j.id === req.params.id);
+    if (job) {
+      job.retries += 1;
+      const backoff = Math.min(10000 * Math.pow(2, job.retries - 1), 3600000); // Max 1 hour
+      job.nextRunAt = Date.now() + backoff;
+      job.status = 'pending';
+      job.error = req.body.error;
+      job.updatedAt = Date.now();
+      writeJobs(jobs);
+    }
+    res.json({ success: true });
+  });
+
+  app.put('/api/jobs/:id/pause', (req, res) => {
+    const jobs = readJobs();
+    const job = jobs.find((j: any) => j.id === req.params.id);
+    if (job && (job.status === 'pending' || job.status === 'processing' || job.status === 'failed')) {
+      job.status = 'paused';
+      job.updatedAt = Date.now();
+      writeJobs(jobs);
+    }
+    res.json({ success: true });
+  });
+
+  app.put('/api/jobs/:id/resume', (req, res) => {
+    const jobs = readJobs();
+    const job = jobs.find((j: any) => j.id === req.params.id);
+    if (job && (job.status === 'paused' || job.status === 'pending')) {
+      job.status = 'pending';
+      job.nextRunAt = Date.now();
+      job.updatedAt = Date.now();
+      writeJobs(jobs);
+    }
+    res.json({ success: true });
+  });
+
+  app.delete('/api/jobs/:id', (req, res) => {
+    let jobs = readJobs();
+    jobs = jobs.filter((j: any) => j.id !== req.params.id);
+    writeJobs(jobs);
+    res.json({ success: true });
   });
 
   // Vite middleware for development

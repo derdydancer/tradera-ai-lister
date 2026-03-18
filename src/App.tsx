@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileText, List, Save, Trash2, Download, Plus, Loader2, Edit3, X } from 'lucide-react';
+import { Upload, FileText, List, Save, Trash2, Download, Plus, Loader2, Edit3, X, Search } from 'lucide-react';
 import Papa from 'papaparse';
+import Markdown from 'react-markdown';
+import traderaCategories from './tradera_categories.json';
 
 interface AdData {
   id?: string;
@@ -25,6 +27,27 @@ interface AdData {
   'Vald sluttid': string;
   Moms: string;
   Lagersaldo: string;
+  ResearchReport?: string;
+}
+
+interface Job {
+  id: string;
+  type: 'generate' | 'research';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'paused';
+  adId: string;
+  payload: any;
+  error?: string;
+  retries: number;
+  nextRunAt: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface BulkItem {
+  id: string;
+  file: File;
+  previewUrl: string;
+  description: string;
 }
 
 import { GoogleGenAI } from '@google/genai';
@@ -54,21 +77,152 @@ const DEFAULT_AD: AdData = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'create' | 'list'>('create');
+  const [activeTab, setActiveTab] = useState<'create' | 'list' | 'bulk-upload' | 'jobs'>('create');
   const [ads, setAds] = useState<AdData[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [bulkItems, setBulkItems] = useState<BulkItem[]>([]);
   const [currentAd, setCurrentAd] = useState<AdData>(DEFAULT_AD);
   const [images, setImages] = useState<File[]>([]);
   const [description, setDescription] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [researchReport, setResearchReport] = useState<string | null>(null);
+  const [isResearching, setIsResearching] = useState(false);
+  const [selectedAds, setSelectedAds] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    console.log('[Client] App component mounted. Fetching ads...');
+    console.log('[Client] App component mounted. Fetching ads and jobs...');
     fetchAds();
+    fetchJobs();
   }, []);
+
+  const fetchJobs = async () => {
+    try {
+      const res = await fetch('/api/jobs');
+      const data = await res.json();
+      setJobs(data);
+    } catch (error) {
+      console.error('[Client] Failed to fetch jobs:', error);
+    }
+  };
+
+  useEffect(() => {
+    let isPolling = false;
+    let pollTimer: any;
+
+    const pollJobs = async () => {
+      if (isPolling) return;
+      isPolling = true;
+      try {
+        const res = await fetch('/api/jobs/claim', { method: 'POST' });
+        const data = await res.json();
+        if (data.job) {
+          await processJob(data.job);
+        }
+      } catch (e) {
+        console.error('Error polling jobs', e);
+      } finally {
+        isPolling = false;
+        pollTimer = setTimeout(pollJobs, 5000);
+      }
+    };
+
+    pollTimer = setTimeout(pollJobs, 1000);
+    return () => clearTimeout(pollTimer);
+  }, []);
+
+  const processJob = async (job: Job) => {
+    try {
+      const configRes = await fetch('/api/config');
+      const configData = await configRes.json();
+      if (!configData.geminiApiKey) throw new Error('API key not found');
+      
+      const ai = new GoogleGenAI({ apiKey: configData.geminiApiKey });
+
+      if (job.type === 'generate') {
+        const imgRes = await fetch(job.payload.imageUrl);
+        const blob = await imgRes.blob();
+        const base64Data = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string).split(',')[1]);
+          reader.readAsDataURL(blob);
+        });
+
+        const parts = [
+          { inlineData: { data: base64Data, mimeType: blob.type || 'image/jpeg' } },
+          { text: `Du är en expert på att skapa säljande annonser för e-handel och auktionssajter (som Tradera).
+Skapa en annons baserat på de bifogade bilderna och följande extra information: "${job.payload.description || 'Ingen extra information'}".
+
+Här är en lista över alla Tradera-kategorier i JSON-format:
+${JSON.stringify(traderaCategories)}
+
+Returnera resultatet som ett JSON-objekt med följande fält (använd exakt dessa nycklar):
+- "Rubrik": En säljande och tydlig rubrik (max 80 tecken).
+- "Beskrivning": En utförlig objektsbeskrivning. Framhäv skick, märke, material och andra detaljer.
+- "Kategori": Välj det mest relevanta underkategori-ID:t (subcategories.id) från listan ovan. Svara ENDAST med ID:t (t.ex. "302572").
+- "Utropspris": Ett rimligt utropspris i SEK (heltal).
+- "Köp nu-pris": Ett rimligt köp-nu pris i SEK (heltal).
+- "Attribut": Gissa relevanta attribut och slå ihop dem med semikolon. Formatet är "id:värde". 
+  Viktiga ID:n:
+  - Skick (ID 121): Välj ett av "Oanvänt", "Nyskick", "Gott skick", "Välanvänt skick", "Defekt". Exempel: "121:Gott skick".
+  - Färg (ID 2): Max två färger separerade med kommatecken. Exempel: "2:svart,vit".
+  - Märke (ID 3): Exempel: "3:Nike".
+  - Storlek (ID 1): Exempel: "1:M".
+  Slå ihop dem så här: "1:M;2:svart,vit;3:Nike;121:Gott skick".
+- "Annonstyp": Välj "Auction" eller "FixedPrice".
+
+Svara ENDAST med giltig JSON, inga markdown-block eller annan text.` }
+        ];
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-3-flash-preview',
+          contents: { parts },
+          config: { responseMimeType: 'application/json' }
+        });
+
+        const generatedData = JSON.parse(response.text || '{}');
+        
+        await fetch(`/api/jobs/${job.id}/success`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ result: generatedData })
+        });
+
+      } else if (job.type === 'research') {
+        const prompt = `Sök på tradera.com efter sålda och listade objekt som liknar följande: "${job.payload.rubrik}" - "${job.payload.beskrivning}". 
+Ta reda på om samma eller liknande objekt har sålts och till vilket pris. 
+Generera en rapport i markdown-format med rekommendation på prissättning. 
+Hänvisa till de hittade annonserna, inkludera inbäddad bild för varje hittad annons och länk till annonsen på tradera.`;
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.1-pro-preview',
+          contents: prompt,
+          config: { tools: [{ googleSearch: {} }] }
+        });
+
+        await fetch(`/api/jobs/${job.id}/success`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ result: { report: response.text } })
+        });
+      }
+      
+      fetchAds();
+      fetchJobs();
+
+    } catch (error: any) {
+      console.error('Job failed:', error);
+      await fetch(`/api/jobs/${job.id}/error`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: error.message || String(error) })
+      });
+      fetchJobs();
+    }
+  };
 
   const fetchAds = async () => {
     try {
@@ -137,10 +291,13 @@ export default function App() {
 Du är en expert på att skapa säljande annonser för e-handel och auktionssajter (som Tradera).
 Skapa en annons baserat på de bifogade bilderna och följande extra information: "${description || 'Ingen extra information'}".
 
+Här är en lista över alla Tradera-kategorier i JSON-format:
+${JSON.stringify(traderaCategories)}
+
 Returnera resultatet som ett JSON-objekt med följande fält (använd exakt dessa nycklar):
 - "Rubrik": En säljande och tydlig rubrik (max 80 tecken).
 - "Beskrivning": En utförlig objektsbeskrivning. Framhäv skick, märke, material och andra detaljer.
-- "Kategori": Försök gissa en relevant kategori (i text, användaren får mappa till ID senare).
+- "Kategori": Välj det mest relevanta underkategori-ID:t (subcategories.id) från listan ovan. Svara ENDAST med ID:t (t.ex. "302572").
 - "Utropspris": Ett rimligt utropspris i SEK (heltal).
 - "Köp nu-pris": Ett rimligt köp-nu pris i SEK (heltal).
 - "Attribut": Gissa relevanta attribut och slå ihop dem med semikolon. Formatet är "id:värde". 
@@ -191,16 +348,61 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
     }
   };
 
+  const researchAd = async () => {
+    if (!currentAd.Rubrik) {
+      alert('Vänligen generera eller fyll i en rubrik först.');
+      return;
+    }
+
+    setIsResearching(true);
+    setResearchReport(null);
+    try {
+      const configRes = await fetch('/api/config');
+      const configData = await configRes.json();
+      
+      if (!configData.geminiApiKey) {
+        throw new Error('API key not found on server');
+      }
+
+      const ai = new GoogleGenAI({ apiKey: configData.geminiApiKey });
+
+      const prompt = `Sök på tradera.com efter sålda och listade objekt som liknar följande: "${currentAd.Rubrik}" - "${currentAd.Beskrivning}". 
+Ta reda på om samma eller liknande objekt har sålts och till vilket pris. 
+Generera en rapport i markdown-format med rekommendation på prissättning. 
+Hänvisa till de hittade annonserna, inkludera inbäddad bild för varje hittad annons och länk till annonsen på tradera.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.1-pro-preview',
+        contents: prompt,
+        config: {
+          tools: [{ googleSearch: {} }],
+        }
+      });
+
+      setResearchReport(response.text || 'Kunde inte generera rapport.');
+    } catch (error) {
+      console.error('Research failed:', error);
+      alert('Kunde inte utföra research.');
+    } finally {
+      setIsResearching(false);
+    }
+  };
+
   const saveAd = async () => {
     setIsSaving(true);
     try {
       const method = editingId ? 'PUT' : 'POST';
       const url = editingId ? `/api/ads/${editingId}` : '/api/ads';
       
+      const adToSave = { ...currentAd };
+      if (researchReport) {
+        adToSave.ResearchReport = researchReport;
+      }
+      
       await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentAd),
+        body: JSON.stringify(adToSave),
       });
       
       await fetchAds();
@@ -230,6 +432,7 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
     setActiveTab('create');
     setImages([]);
     setDescription('');
+    setResearchReport(ad.ResearchReport || null);
   };
 
   const resetForm = () => {
@@ -237,6 +440,7 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
     setEditingId(null);
     setImages([]);
     setDescription('');
+    setResearchReport(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -272,6 +476,16 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
     setCurrentAd(prev => ({ ...prev, [name]: value }));
   };
 
+  const getCategoryName = (id: string) => {
+    if (!id) return '-';
+    for (const cat of traderaCategories) {
+      for (const sub of cat.subcategories) {
+        if (sub.id === id) return sub.name;
+      }
+    }
+    return id;
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900 font-sans">
       <header className="bg-white border-b border-neutral-200 sticky top-0 z-10">
@@ -280,7 +494,7 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
               AL
             </div>
-            <h1 className="text-xl font-semibold tracking-tight">AI Lister <span className="text-xs font-normal text-neutral-500 ml-2" title="Version">v1.0</span></h1>
+            <h1 className="text-xl font-semibold tracking-tight" title="Applikationens namn och version">AI Lister <span className="text-xs font-normal text-neutral-500 ml-2" title="Version">v2.0</span></h1>
           </div>
           <nav className="flex gap-1">
             <button
@@ -294,6 +508,16 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
               </div>
             </button>
             <button
+              onClick={() => setActiveTab('bulk-upload')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'bulk-upload' ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'}`}
+              title="Ladda upp flera bilder och generera annonser i bakgrunden"
+            >
+              <div className="flex items-center gap-2">
+                <Upload size={16} />
+                Massuppladdning
+              </div>
+            </button>
+            <button
               onClick={() => setActiveTab('list')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'list' ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'}`}
               title="Visa alla sparade annonser"
@@ -301,6 +525,16 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
               <div className="flex items-center gap-2">
                 <List size={16} />
                 Mina Annonser ({ads.length})
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('jobs')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'jobs' ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'}`}
+              title="Hantera bakgrundsjobb för AI-generering och research"
+            >
+              <div className="flex items-center gap-2">
+                <Loader2 size={16} className={jobs.some(j => j.status === 'processing') ? 'animate-spin' : ''} />
+                Jobb ({jobs.filter(j => j.status === 'pending' || j.status === 'processing').length})
               </div>
             </button>
           </nav>
@@ -374,16 +608,46 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
               <div className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold">Annonsdetaljer</h2>
-                  <button
-                    onClick={saveAd}
-                    disabled={isSaving || !currentAd.Rubrik}
-                    className="flex items-center gap-2 bg-emerald-600 text-white py-2 px-4 rounded-md font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Spara annonsen till din lista"
-                  >
-                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                    Spara Annons
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={researchAd}
+                      disabled={isResearching || !currentAd.Rubrik}
+                      className="flex items-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Sök på Tradera efter liknande objekt och få prisförslag"
+                    >
+                      {isResearching ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
+                      Research
+                    </button>
+                    <button
+                      onClick={saveAd}
+                      disabled={isSaving || !currentAd.Rubrik}
+                      className="flex items-center gap-2 bg-emerald-600 text-white py-2 px-4 rounded-md font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Spara annonsen till din lista"
+                    >
+                      {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                      Spara Annons
+                    </button>
+                  </div>
                 </div>
+
+                {(isResearching || researchReport) && (
+                  <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 className="text-md font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                      <Search size={16} />
+                      Prisresearch & Rekommendation
+                    </h3>
+                    {isResearching ? (
+                      <div className="flex items-center gap-2 text-blue-600 text-sm">
+                        <Loader2 size={16} className="animate-spin" />
+                        Söker på Tradera och analyserar priser...
+                      </div>
+                    ) : (
+                      <div className="prose prose-sm prose-blue max-w-none">
+                        <Markdown>{researchReport || ''}</Markdown>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
@@ -410,15 +674,22 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1" title="Kategori-ID för plattformen">Kategori (ID)</label>
-                    <input
-                      type="text"
+                    <label className="block text-sm font-medium text-neutral-700 mb-1" title="Kategori för annonsen">Kategori</label>
+                    <select
                       name="Kategori"
                       value={currentAd.Kategori}
                       onChange={handleInputChange}
-                      placeholder="T.ex. 16 för kläder"
                       className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
+                    >
+                      <option value="">Välj kategori...</option>
+                      {traderaCategories.map(cat => (
+                        <optgroup key={cat.id} label={cat.name}>
+                          {cat.subcategories.map(sub => (
+                            <option key={sub.id} value={sub.id}>{sub.name}</option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
@@ -524,22 +795,59 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
           <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
             <div className="p-6 border-b border-neutral-200 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Mina Annonser</h2>
-              <button
-                onClick={exportToCSV}
-                className="flex items-center gap-2 bg-indigo-600 text-white py-2 px-4 rounded-md font-medium hover:bg-indigo-700 transition-colors"
-                title="Exportera alla annonser till en CSV-fil för ProLister"
-              >
-                <Download size={18} />
-                Exportera CSV
-              </button>
+              <div className="flex items-center gap-3">
+                {selectedAds.length > 0 && (
+                  <button
+                    onClick={async () => {
+                      const adsToResearch = ads.filter(a => selectedAds.includes(a.id!));
+                      const jobs = adsToResearch.map(ad => ({
+                        type: 'research',
+                        adId: ad.id,
+                        payload: { rubrik: ad.Rubrik, beskrivning: ad.Beskrivning }
+                      }));
+                      await fetch('/api/jobs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ jobs })
+                      });
+                      setSelectedAds([]);
+                      setActiveTab('jobs');
+                      fetchJobs();
+                    }}
+                    className="flex items-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors"
+                    title="Gör research på valda annonser i bakgrunden"
+                  >
+                    <Search size={18} />
+                    Research valda ({selectedAds.length})
+                  </button>
+                )}
+                <button
+                  onClick={exportToCSV}
+                  className="flex items-center gap-2 bg-indigo-600 text-white py-2 px-4 rounded-md font-medium hover:bg-indigo-700 transition-colors"
+                  title="Exportera alla annonser till en CSV-fil för ProLister"
+                >
+                  <Download size={18} />
+                  Exportera CSV
+                </button>
+              </div>
             </div>
             
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-neutral-50 text-neutral-600 font-medium border-b border-neutral-200">
                   <tr>
+                    <th className="px-6 py-3 w-10">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedAds.length === ads.length && ads.length > 0}
+                        onChange={(e) => setSelectedAds(e.target.checked ? ads.map(a => a.id!) : [])}
+                        className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
+                        title="Markera alla annonser"
+                      />
+                    </th>
                     <th className="px-6 py-3">Bild</th>
                     <th className="px-6 py-3">Rubrik</th>
+                    <th className="px-6 py-3">Kategori</th>
                     <th className="px-6 py-3">Typ</th>
                     <th className="px-6 py-3">Pris</th>
                     <th className="px-6 py-3 text-right">Åtgärder</th>
@@ -548,7 +856,7 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
                 <tbody className="divide-y divide-neutral-200">
                   {ads.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-neutral-500">
+                      <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">
                         Inga annonser skapade ännu.
                       </td>
                     </tr>
@@ -557,6 +865,18 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
                       const firstImage = ad.Bilder ? ad.Bilder.split(',')[0] : null;
                       return (
                         <tr key={ad.id} className="hover:bg-neutral-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <input 
+                              type="checkbox" 
+                              checked={selectedAds.includes(ad.id!)}
+                              onChange={(e) => {
+                                if (e.target.checked) setSelectedAds([...selectedAds, ad.id!]);
+                                else setSelectedAds(selectedAds.filter(id => id !== ad.id));
+                              }}
+                              className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
+                              title="Markera annons"
+                            />
+                          </td>
                           <td className="px-6 py-4">
                             {firstImage ? (
                               <img src={firstImage} alt="Thumbnail" className="w-12 h-12 object-cover rounded-md border border-neutral-200" />
@@ -568,6 +888,9 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
                           </td>
                           <td className="px-6 py-4 font-medium text-neutral-900 max-w-xs truncate" title={ad.Rubrik}>
                             {ad.Rubrik || 'Utan rubrik'}
+                          </td>
+                          <td className="px-6 py-4 text-neutral-600 max-w-[150px] truncate" title={getCategoryName(ad.Kategori)}>
+                            {getCategoryName(ad.Kategori)}
                           </td>
                           <td className="px-6 py-4 text-neutral-600">
                             {ad.Annonstyp === 'Auction' ? 'Auktion' : ad.Annonstyp === 'FixedPrice' ? 'Fast pris' : 'Butik'}
@@ -596,6 +919,233 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
                         </tr>
                       );
                     })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {activeTab === 'bulk-upload' && (
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200">
+            <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+              <Upload size={20} className="text-indigo-600" />
+              Massuppladdning
+            </h2>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-neutral-700 mb-2" title="Välj bilder för att skapa flera annonser samtidigt">Välj bilder (en bild per annons)</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                title="Klicka här för att välja bilder"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  const newItems = files.map(f => ({
+                    id: Math.random().toString(),
+                    file: f,
+                    previewUrl: URL.createObjectURL(f),
+                    description: ''
+                  }));
+                  setBulkItems(prev => [...prev, ...newItems]);
+                }}
+                className="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors"
+              />
+            </div>
+
+            {bulkItems.length > 0 && (
+              <div className="space-y-4 mb-6">
+                <h3 className="font-medium text-neutral-900">Valda bilder ({bulkItems.length})</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {bulkItems.map(item => (
+                    <div key={item.id} className="border border-neutral-200 rounded-lg p-3 flex gap-3">
+                      <img src={item.previewUrl} alt="Preview" className="w-20 h-20 object-cover rounded-md" />
+                      <div className="flex-1">
+                        <textarea
+                          value={item.description}
+                          onChange={(e) => setBulkItems(prev => prev.map(i => i.id === item.id ? { ...i, description: e.target.value } : i))}
+                          placeholder="Extra info (valfritt)..."
+                          className="w-full h-full text-sm rounded-md border border-neutral-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          title="Lägg till extra information för denna bild"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => setBulkItems(prev => prev.filter(i => i.id !== item.id))}
+                        className="text-neutral-400 hover:text-red-500"
+                        title="Ta bort bild"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={async () => {
+                      if (bulkItems.length === 0) return;
+                      
+                      // Upload all images
+                      const formData = new FormData();
+                      bulkItems.forEach(item => formData.append('images', item.file));
+                      
+                      const uploadRes = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData,
+                      });
+                      const uploadData = await uploadRes.json();
+                      const urls = uploadData.urls;
+                      
+                      // Create ads and jobs
+                      const newJobs = [];
+                      for (let i = 0; i < bulkItems.length; i++) {
+                        const item = bulkItems[i];
+                        const url = urls[i];
+                        
+                        // Create draft ad
+                        const adRes = await fetch('/api/ads', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            ...DEFAULT_AD,
+                            Rubrik: 'Genererar...',
+                            Bilder: url,
+                            Beskrivning: item.description
+                          })
+                        });
+                        const newAd = await adRes.json();
+                        
+                        newJobs.push({
+                          type: 'generate',
+                          adId: newAd.id,
+                          payload: { imageUrl: url, description: item.description }
+                        });
+                      }
+                      
+                      // Queue jobs
+                      await fetch('/api/jobs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ jobs: newJobs })
+                      });
+                      
+                      setBulkItems([]);
+                      fetchAds();
+                      fetchJobs();
+                      setActiveTab('jobs');
+                    }}
+                    className="flex items-center gap-2 bg-indigo-600 text-white py-2 px-6 rounded-md font-medium hover:bg-indigo-700 transition-colors"
+                    title="Skapa utkast och starta AI-generering i bakgrunden för alla valda bilder"
+                  >
+                    <Upload size={18} />
+                    Skapa annonser och starta AI
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'jobs' && (
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+            <div className="p-6 border-b border-neutral-200 flex items-center justify-between">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Loader2 size={20} className={`text-indigo-600 ${jobs.some(j => j.status === 'processing') ? 'animate-spin' : ''}`} />
+                Bakgrundsjobb
+              </h2>
+              <div className="text-sm text-neutral-500">
+                Lämna denna flik öppen för att bearbeta jobben.
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-neutral-50 text-neutral-600 font-medium border-b border-neutral-200">
+                  <tr>
+                    <th className="px-6 py-3">Typ</th>
+                    <th className="px-6 py-3">Annons ID</th>
+                    <th className="px-6 py-3">Status</th>
+                    <th className="px-6 py-3">Försök</th>
+                    <th className="px-6 py-3">Nästa körning</th>
+                    <th className="px-6 py-3 text-right">Åtgärder</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {jobs.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
+                        Inga aktiva jobb.
+                      </td>
+                    </tr>
+                  ) : (
+                    jobs.sort((a, b) => b.createdAt - a.createdAt).map((job) => (
+                      <tr key={job.id} className="hover:bg-neutral-50 transition-colors">
+                        <td className="px-6 py-4 font-medium text-neutral-900">
+                          {job.type === 'generate' ? 'AI-Generering' : 'Research'}
+                        </td>
+                        <td className="px-6 py-4 text-neutral-500 font-mono text-xs">
+                          {job.adId}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            job.status === 'completed' ? 'bg-emerald-100 text-emerald-800' :
+                            job.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                            job.status === 'failed' ? 'bg-red-100 text-red-800' :
+                            job.status === 'paused' ? 'bg-neutral-100 text-neutral-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {job.status}
+                          </span>
+                          {job.error && <div className="text-xs text-red-500 mt-1 max-w-xs truncate" title={job.error}>{job.error}</div>}
+                        </td>
+                        <td className="px-6 py-4 text-neutral-600">
+                          {job.retries}
+                        </td>
+                        <td className="px-6 py-4 text-neutral-600">
+                          {job.status === 'pending' ? new Date(job.nextRunAt).toLocaleTimeString() : '-'}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {(job.status === 'pending' || job.status === 'processing' || job.status === 'failed') && (
+                              <button
+                                onClick={async () => {
+                                  await fetch(`/api/jobs/${job.id}/pause`, { method: 'PUT' });
+                                  fetchJobs();
+                                }}
+                                className="text-xs bg-neutral-200 hover:bg-neutral-300 text-neutral-800 py-1 px-2 rounded transition-colors"
+                                title="Pausa detta jobb"
+                              >
+                                Pausa
+                              </button>
+                            )}
+                            {(job.status === 'paused' || job.status === 'failed' || (job.status === 'pending' && job.nextRunAt > Date.now())) && (
+                              <button
+                                onClick={async () => {
+                                  await fetch(`/api/jobs/${job.id}/resume`, { method: 'PUT' });
+                                  fetchJobs();
+                                }}
+                                className="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-800 py-1 px-2 rounded transition-colors"
+                                title="Återuppta och kör detta jobb direkt"
+                              >
+                                Återuppta
+                              </button>
+                            )}
+                            <button
+                              onClick={async () => {
+                                if (confirm('Är du säker på att du vill radera jobbet?')) {
+                                  await fetch(`/api/jobs/${job.id}`, { method: 'DELETE' });
+                                  fetchJobs();
+                                }
+                              }}
+                              className="text-xs bg-red-100 hover:bg-red-200 text-red-800 py-1 px-2 rounded transition-colors"
+                              title="Radera detta jobb för alltid"
+                            >
+                              Radera
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>

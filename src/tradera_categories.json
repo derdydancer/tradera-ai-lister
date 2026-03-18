@@ -1,0 +1,667 @@
+[
+  {
+    "id": "1612",
+    "name": "Allt inom Accessoarer",
+    "subcategories": [
+      { "id": "341084", "name": "Bröllopsaccessoarer" },
+      { "id": "161213", "name": "Bälten och skärp" },
+      { "id": "342924", "name": "Glasögon och tillbehör" },
+      { "id": "163402", "name": "Handskar och vantar" },
+      { "id": "163401", "name": "Huvudbonader" },
+      { "id": "302676", "name": "Håraccessoarer" },
+      { "id": "1001025", "name": "Nyckelringar och nyckelfodral" },
+      { "id": "342775", "name": "Plånböcker" },
+      { "id": "340760", "name": "Sjalar och halsdukar" },
+      { "id": "340275", "name": "Slipsar och flugor" },
+      { "id": "161201", "name": "Solglasögon" },
+      { "id": "341761", "name": "Tygmärken och pins" },
+      { "id": "302661", "name": "Väskor" },
+      { "id": "161209", "name": "Övriga accessoarer" }
+    ]
+  },
+  {
+    "id": "20",
+    "name": "Allt inom Antikt och Design",
+    "subcategories": [
+      { "id": "2001", "name": "Allmoge" },
+      { "id": "2002", "name": "Antikviteter" },
+      { "id": "1001288", "name": "Arkeologi" },
+      { "id": "2028", "name": "Beslag och reservdelar" },
+      { "id": "2003", "name": "Bruks- och prydnadsföremål" },
+      { "id": "2007", "name": "Glas" },
+      { "id": "2008", "name": "Hemslöjd" },
+      { "id": "1001296", "name": "Högtider" },
+      { "id": "2009", "name": "Ikoner och religiösa föremål" },
+      { "id": "2011", "name": "Keramik och porslin, svenskt" },
+      { "id": "2012", "name": "Keramik och porslin, utländskt" },
+      { "id": "2015", "name": "Kopparföremål" },
+      { "id": "2024", "name": "Kuriosa" },
+      { "id": "2018", "name": "Mattor" },
+      { "id": "2025", "name": "Mässings- och Tennföremål" },
+      { "id": "2021", "name": "Orientalisk konst och porslin" },
+      { "id": "2022", "name": "Silver" },
+      { "id": "302983", "name": "Textilier" },
+      { "id": "2027", "name": "Övrig antik och design" }
+    ]
+  },
+  {
+    "id": "1611",
+    "name": "Allt inom Barnartiklar",
+    "subcategories": [
+      { "id": "341823", "name": "Amning och graviditet" },
+      { "id": "1000475", "name": "Babyprodukter" },
+      { "id": "161103", "name": "Barn- och babystolar" },
+      { "id": "1000516", "name": "Barnkalas" },
+      { "id": "1000504", "name": "Barnsäkerhet" },
+      { "id": "161105", "name": "Barnvagnar" },
+      { "id": "302586", "name": "Bilbarnstolar" },
+      { "id": "341200", "name": "Inredning barnrum" },
+      { "id": "161107", "name": "Nappflaskor och barnserviser" },
+      { "id": "161117", "name": "Övriga barnartiklar" }
+    ]
+  },
+  {
+    "id": "33",
+    "name": "Allt inom Barnkläder och Barnskor",
+    "subcategories": [
+      { "id": "302976", "name": "Accessoarer" },
+      { "id": "302776", "name": "Barnkläder" },
+      { "id": "302592", "name": "Barnskor och babyskor" },
+      { "id": "302601", "name": "Maskeradkläder" }
+    ]
+  },
+  {
+    "id": "302571",
+    "name": "Allt inom Barnleksaker",
+    "subcategories": [
+      { "id": "302572", "name": "Babyleksaker" },
+      { "id": "182105", "name": "Barnspel och pussel" },
+      { "id": "182102", "name": "BRIO och träleksaker" },
+      { "id": "302578", "name": "Byggklossar och LEGO" },
+      { "id": "182101", "name": "Dockskåp och dockor" },
+      { "id": "340795", "name": "Experimentlådor och vetenskap" },
+      { "id": "1000578", "name": "Fidgets" },
+      { "id": "340796", "name": "Figurer och leksaksvärldar" },
+      { "id": "344234", "name": "Gosedjur" },
+      { "id": "1000577", "name": "Gunghästar och åkdjur" },
+      { "id": "344233", "name": "Leksaksfordon" },
+      { "id": "1000593", "name": "Leksaksinstrument" },
+      { "id": "1000581", "name": "Magneter" },
+      { "id": "340802", "name": "Pyssla och måla" },
+      { "id": "340794", "name": "Robotleksaker och robotdjur" },
+      { "id": "1000569", "name": "Utklädnad och rollek" },
+      { "id": "302582", "name": "Utomhusleksaker" },
+      { "id": "182106", "name": "Övriga leksaker" }
+    ]
+  },
+  {
+    "id": "34",
+    "name": "Allt inom Biljetter och Resor",
+    "subcategories": [
+      { "id": "340194", "name": "Biobiljetter" },
+      { "id": "3401", "name": "Buss- och tågbiljetter" },
+      { "id": "340248", "name": "Festivaler" },
+      { "id": "340116", "name": "Flygbiljetter" },
+      { "id": "2516", "name": "Hotell och övernattningar" },
+      { "id": "251401", "name": "Konserter" },
+      { "id": "340189", "name": "Kryssningar" },
+      { "id": "343029", "name": "Presentkort och rabattkoder" },
+      { "id": "251403", "name": "Sportevenemang" },
+      { "id": "343797", "name": "Startplatser" },
+      { "id": "340195", "name": "Teaterbiljetter" },
+      { "id": "340774", "name": "Upplevelser" },
+      { "id": "251406", "name": "Övriga biljetter" }
+    ]
+  },
+  {
+    "id": "32",
+    "name": "Allt inom Bygg och Verktyg",
+    "subcategories": [
+      { "id": "302452", "name": "Badrum" },
+      { "id": "301860", "name": "Belysning och armaturer" },
+      { "id": "1001281", "name": "Brand" },
+      { "id": "343348", "name": "Byggmaterial" },
+      { "id": "343333", "name": "Elinstallation" },
+      { "id": "343359", "name": "Färg och tapeter" },
+      { "id": "343342", "name": "Golv, kakel och klinker" },
+      { "id": "343328", "name": "Krokar, handtag och beslag" },
+      { "id": "302456", "name": "Kök" },
+      { "id": "343367", "name": "Lås och larm" },
+      { "id": "302409", "name": "Maskiner" },
+      { "id": "302418", "name": "Skruv, plugg och spik" },
+      { "id": "302413", "name": "Skyddsutrustning och kläder" },
+      { "id": "344623", "name": "Solenergi" },
+      { "id": "302447", "name": "Svetsning och lödning" },
+      { "id": "302415", "name": "Verkstad" },
+      { "id": "302408", "name": "Verktyg" },
+      { "id": "302459", "name": "VVS" },
+      { "id": "343368", "name": "Värme" },
+      { "id": "301811", "name": "Övriga byggartiklar" }
+    ]
+  },
+  {
+    "id": "11",
+    "name": "Allt inom Böcker och Tidningar",
+    "subcategories": [
+      { "id": "1136", "name": "Almanackor och kalendrar" },
+      { "id": "1128", "name": "Amerikanska serier" },
+      { "id": "1101", "name": "Antik litteratur" },
+      { "id": "1134", "name": "Antologier" },
+      { "id": "1102", "name": "Barn- och ungdomsböcker" },
+      { "id": "1104", "name": "Biografier och memoarer" },
+      { "id": "1103", "name": "Botanik" },
+      { "id": "1105", "name": "Dator och teknik" },
+      { "id": "1106", "name": "Drama, dans, film och teater" },
+      { "id": "1001276", "name": "Filosofisk litteratur" },
+      { "id": "344493", "name": "Flyg- och flyghistoria" },
+      { "id": "1008", "name": "Fordonslitteratur" },
+      { "id": "1412", "name": "Fotolitteratur" },
+      { "id": "1139", "name": "Företagsrelaterat" },
+      { "id": "1108", "name": "Grafik, kartor och tryck" },
+      { "id": "340146", "name": "Graviditets- och barnböcker" },
+      { "id": "1112", "name": "Handarbete" },
+      { "id": "341637", "name": "Harlequin och kiosklitteratur" },
+      { "id": "1133", "name": "Hem och hushåll" },
+      { "id": "1110", "name": "Historia" },
+      { "id": "1132", "name": "Husdjursböcker" },
+      { "id": "1135", "name": "Hälsa och skönhet" },
+      { "id": "1126", "name": "Juridik och kriminologi" },
+      { "id": "1141", "name": "Järnväg och spårväg" },
+      { "id": "1142", "name": "Konst och hantverk" },
+      { "id": "1140", "name": "Korsord och korsordsrelaterat" },
+      { "id": "302939", "name": "Kurslitteratur och undervisning" },
+      { "id": "1131", "name": "Litteraturvetenskap" },
+      { "id": "1138", "name": "Ljudböcker och språkkurser" },
+      { "id": "1113", "name": "Medicin och psykologi" },
+      { "id": "1137", "name": "Musik, visor och vistryck" },
+      { "id": "1115", "name": "Naturalia" },
+      { "id": "1114", "name": "Naturvetenskap" },
+      { "id": "1116", "name": "Planschverk och illustrerade böcker" },
+      { "id": "341667", "name": "Pocket" },
+      { "id": "1107", "name": "Religion och livsåskådning" },
+      { "id": "1117", "name": "Resor och topografi" },
+      { "id": "1118", "name": "Samhällskunskap" },
+      { "id": "113003", "name": "Serieoriginal" },
+      { "id": "1129", "name": "Serier övriga världen" },
+      { "id": "1119", "name": "Skönlitteratur" },
+      { "id": "1120", "name": "Sport och fritid" },
+      { "id": "1127", "name": "Svenska serier" },
+      { "id": "342296", "name": "Technica och nautica" },
+      { "id": "1122", "name": "Tidskrifter" },
+      { "id": "1125", "name": "Uppslagsverk och lexikon" },
+      { "id": "1124", "name": "Övriga böcker och tidningar" }
+    ]
+  },
+  {
+    "id": "12",
+    "name": "Allt inom Datorer och Tillbehör",
+    "subcategories": [
+      { "id": "120301", "name": "Bildskärmar" },
+      { "id": "1000242", "name": "Datorer" },
+      { "id": "302612", "name": "Datorkomponenter" },
+      { "id": "1000260", "name": "Datorservrar och tillbehör" },
+      { "id": "1203", "name": "Datortillbehör" },
+      { "id": "120304", "name": "Extern lagring" },
+      { "id": "1214", "name": "Nätverk och tillbehör" },
+      { "id": "1204", "name": "Program och mjukvara" },
+      { "id": "1212", "name": "Skrivare och skanners" },
+      { "id": "1209", "name": "Övrigt datorer och tillbehör" }
+    ]
+  },
+  {
+    "id": "13",
+    "name": "Allt inom DVD och Videofilmer",
+    "subcategories": [
+      { "id": "1001255", "name": "4k ultra HD" },
+      { "id": "302602", "name": "Blu-ray" },
+      { "id": "1301", "name": "DVD-filmer" },
+      { "id": "341050", "name": "Filmmerchandise" },
+      { "id": "1303", "name": "Laserdisc" },
+      { "id": "343384", "name": "Svensk film" },
+      { "id": "1302", "name": "VHS-filmer" }
+    ]
+  },
+  {
+    "id": "10",
+    "name": "Allt inom Fordon",
+    "subcategories": [
+      { "id": "1001383", "name": "A-traktor" },
+      { "id": "1001", "name": "Bilar" },
+      { "id": "100201", "name": "Båtar" },
+      { "id": "343315", "name": "Crossar" },
+      { "id": "302503", "name": "Entreprenad- och lantbruksmaskiner" },
+      { "id": "302496", "name": "Fyrhjulingar" },
+      { "id": "1001389", "name": "Husbilar och husvagnar" },
+      { "id": "1001390", "name": "Lastbilar och bussar" },
+      { "id": "340913", "name": "Mopeder" },
+      { "id": "302479", "name": "Motorcyklar" },
+      { "id": "1001380", "name": "Släpvagnar och trailers" },
+      { "id": "100901", "name": "Snöskotrar" }
+    ]
+  },
+  {
+    "id": "1001386",
+    "name": "Allt inom Fordonsdelar och tillbehör",
+    "subcategories": [
+      { "id": "343418", "name": "Bildelar och reservdelar" },
+      { "id": "343555", "name": "Biltillbehör" },
+      { "id": "302467", "name": "Båtdelar och tillbehör" },
+      { "id": "302495", "name": "Fyrhjulingsdelar och tillbehör" },
+      { "id": "1004", "name": "Husvagn och husbil – delar och tillbehör" },
+      { "id": "1005", "name": "Lastbils- och bussdelar och tillbehör" },
+      { "id": "1001388", "name": "Maskindelar och tillbehör" },
+      { "id": "341049", "name": "Merchandise" },
+      { "id": "302480", "name": "Mopeddelar och tillbehör" },
+      { "id": "343314", "name": "Motocrossdelar och tillbehör" },
+      { "id": "1000924", "name": "Motorcykeldelar och tillbehör" },
+      { "id": "343650", "name": "Service och reparation" },
+      { "id": "302475", "name": "Släpvagnar och tillbehör" },
+      { "id": "1009", "name": "Snöskoterdelar och tillbehör" },
+      { "id": "1010", "name": "Övrigt fordonsrelaterat" }
+    ]
+  },
+  {
+    "id": "14",
+    "name": "Allt inom Foto, Kameror och Optik",
+    "subcategories": [
+      { "id": "302629", "name": "Analoga projektorer" },
+      { "id": "340861", "name": "Digitala fotoramar" },
+      { "id": "1000207", "name": "Filmkameror" },
+      { "id": "1000233", "name": "Fotoalbum" },
+      { "id": "1406", "name": "Fotoframkallning och mörkrum" },
+      { "id": "1000205", "name": "Fotokameror" },
+      { "id": "342583", "name": "Fotoutrustning" },
+      { "id": "1402", "name": "Kameratillbehör" },
+      { "id": "342677", "name": "Kikare och teleskop" },
+      { "id": "1001057", "name": "Mikroskop" },
+      { "id": "1411", "name": "Övrig optisk utrustning" }
+    ]
+  },
+  {
+    "id": "15",
+    "name": "Allt inom Frimärken",
+    "subcategories": [
+      { "id": "151101", "name": "Afrika" },
+      { "id": "151102", "name": "Asien" },
+      { "id": "1510", "name": "Europa" },
+      { "id": "1000120", "name": "Flera länder" },
+      { "id": "151104", "name": "Nordamerika" },
+      { "id": "1000063", "name": "Norden" },
+      { "id": "151103", "name": "Oceanien" },
+      { "id": "344684", "name": "Replikor" },
+      { "id": "1501", "name": "Sverige" },
+      { "id": "151105", "name": "Sydamerika och Karibien" },
+      { "id": "1000058", "name": "Tillbehör" },
+      { "id": "1511", "name": "Övriga Världen" }
+    ]
+  },
+  {
+    "id": "36",
+    "name": "Allt inom Handgjort och Konsthantverk",
+    "subcategories": [
+      { "id": "344797", "name": "Accessoarer" },
+      { "id": "344840", "name": "Baby, barn och lek" },
+      { "id": "1001181", "name": "Dekorationer" },
+      { "id": "344864", "name": "Inredning och hushåll" },
+      { "id": "344755", "name": "Kläder" },
+      { "id": "344732", "name": "Smycken" },
+      { "id": "344944", "name": "Övrigt handgjort" }
+    ]
+  },
+  {
+    "id": "31",
+    "name": "Allt inom Hem och Hushåll",
+    "subcategories": [
+      { "id": "1627", "name": "Bröllopsdukning och dekorationer" },
+      { "id": "342530", "name": "Eld och grill" },
+      { "id": "1608", "name": "Hemtextil" },
+      { "id": "1613", "name": "Hushållsartiklar" },
+      { "id": "342546", "name": "Hushållsmaskiner" },
+      { "id": "1619", "name": "Hälsoprodukter" },
+      { "id": "1609", "name": "Inredningsdetaljer" },
+      { "id": "340128", "name": "Kaffe och te" },
+      { "id": "302528", "name": "Lampor" },
+      { "id": "1615", "name": "Mattor" },
+      { "id": "1604", "name": "Möbler" },
+      { "id": "1606", "name": "Resetillbehör" },
+      { "id": "344373", "name": "Tupperware" },
+      { "id": "1601", "name": "Vitvaror" },
+      { "id": "1607", "name": "Övrigt hem och hushåll" }
+    ]
+  },
+  {
+    "id": "17",
+    "name": "Allt inom Hemelektronik",
+    "subcategories": [
+      { "id": "1714", "name": "Bilstereo" },
+      { "id": "1701", "name": "Bärbart" },
+      { "id": "1709", "name": "Digital-TV" },
+      { "id": "1702", "name": "DVD-, video- och blurayspelare" },
+      { "id": "302202", "name": "GPS:er och navigationsutrustning" },
+      { "id": "302383", "name": "Hemmabio" },
+      { "id": "1703", "name": "Högtalare" },
+      { "id": "340265", "name": "Hörlurar" },
+      { "id": "170102", "name": "Mp3 och Mp4-spelare" },
+      { "id": "170202", "name": "Projektorer" },
+      { "id": "344687", "name": "Smart home" },
+      { "id": "1706", "name": "Stereo och HIFI" },
+      { "id": "1707", "name": "TV och tillbehör" },
+      { "id": "1708", "name": "Övrig hemelektronik" }
+    ]
+  },
+  {
+    "id": "18",
+    "name": "Allt inom Hobby",
+    "subcategories": [
+      { "id": "1713", "name": "Amatörradio" },
+      { "id": "1818", "name": "Bräd- och sällskapsspel" },
+      { "id": "1711", "name": "Elektronikinstrument" },
+      { "id": "1710", "name": "Elektronikkomponenter" },
+      { "id": "1802", "name": "Hantverk" },
+      { "id": "1803", "name": "Hobbymaterial" },
+      { "id": "342769", "name": "Konstnärstillbehör" },
+      { "id": "1805", "name": "Militära leksaker" },
+      { "id": "1806", "name": "Miniatyroptica" },
+      { "id": "1807", "name": "Modelljärnvägar" },
+      { "id": "302063", "name": "Modellmotorer" },
+      { "id": "1808", "name": "New Age" },
+      { "id": "1809", "name": "Plastbyggsatser" },
+      { "id": "302609", "name": "Pussel" },
+      { "id": "1811", "name": "Radiostyrt" },
+      { "id": "1812", "name": "Roll- och figurspel" },
+      { "id": "1823", "name": "Scrapbooking" },
+      { "id": "1813", "name": "Skalamodeller" },
+      { "id": "180314", "name": "Smyckestillverkning" },
+      { "id": "1815", "name": "Spelautomater" },
+      { "id": "1819", "name": "Sömnad och stickning" },
+      { "id": "341800", "name": "Tatuering" },
+      { "id": "1820", "name": "Övrig hobby" }
+    ]
+  },
+  {
+    "id": "19",
+    "name": "Allt inom Klockor",
+    "subcategories": [
+      { "id": "1901", "name": "Armbandsur" },
+      { "id": "342158", "name": "Barnklockor" },
+      { "id": "1913", "name": "Fickur" },
+      { "id": "341882", "name": "Klockor till hemmet" },
+      { "id": "1000987", "name": "Sjuksköterskeklockor" },
+      { "id": "1914", "name": "Tidtagarur" },
+      { "id": "1915", "name": "Tillbehör och reservdelar" },
+      { "id": "1927", "name": "Övrigt klockrelaterat" }
+    ]
+  },
+  {
+    "id": "16",
+    "name": "Allt inom Kläder",
+    "subcategories": [
+      { "id": "302073", "name": "Damkläder" },
+      { "id": "302074", "name": "Herrkläder" },
+      { "id": "1632", "name": "Mammakläder" },
+      { "id": "1625", "name": "Maskeradkläder" }
+    ]
+  },
+  {
+    "id": "23",
+    "name": "Allt inom Konst",
+    "subcategories": [
+      { "id": "2301", "name": "Fotokonst" },
+      { "id": "341865", "name": "Grafik och teckningar" },
+      { "id": "2309", "name": "Måleri" },
+      { "id": "342947", "name": "Posters" },
+      { "id": "342930", "name": "Ramar" },
+      { "id": "344537", "name": "Reliefer" },
+      { "id": "344540", "name": "Övrig konst" }
+    ]
+  },
+  {
+    "id": "21",
+    "name": "Allt inom Musik",
+    "subcategories": [
+      { "id": "1001373", "name": "8-track" },
+      { "id": "2101", "name": "CD" },
+      { "id": "2112", "name": "DJ-utrustning" },
+      { "id": "2102", "name": "Kassettband" },
+      { "id": "2117", "name": "Merchandise" },
+      { "id": "2104", "name": "Musikinstrument" },
+      { "id": "2116", "name": "Musikposters" },
+      { "id": "2105", "name": "Musiktidningar och litteratur" },
+      { "id": "2115", "name": "Musiktillbehör" },
+      { "id": "2114", "name": "Noter och nothäften" },
+      { "id": "2113", "name": "Rullband" },
+      { "id": "2106", "name": "Skivomslag" },
+      { "id": "2107", "name": "Stenkakor" },
+      { "id": "2111", "name": "Studio och scenutrustning" },
+      { "id": "2108", "name": "Vinyl" }
+    ]
+  },
+  {
+    "id": "22",
+    "name": "Allt inom Mynt och Sedlar",
+    "subcategories": [
+      { "id": "2205", "name": "Euromynt och sedlar" },
+      { "id": "2203", "name": "Sedlar" },
+      { "id": "2201", "name": "Svenska Mynt" },
+      { "id": "2202", "name": "Utländska Mynt" },
+      { "id": "2204", "name": "Övrigt mynt och sedlar" }
+    ]
+  },
+  {
+    "id": "29",
+    "name": "Allt inom Samlarsaker",
+    "subcategories": [
+      { "id": "2910", "name": "Affischer" },
+      { "id": "2901", "name": "Autografer" },
+      { "id": "2902", "name": "Bensinia" },
+      { "id": "2904", "name": "Breweriana" },
+      { "id": "2906", "name": "Båt- och fartygsmemorabilia" },
+      { "id": "2950", "name": "Dalahästar" },
+      { "id": "2907", "name": "Disney" },
+      { "id": "2908", "name": "Dockor" },
+      { "id": "2911", "name": "Filmmemorabilia" },
+      { "id": "341008", "name": "Flaggor" },
+      { "id": "342765", "name": "Flyg" },
+      { "id": "2912", "name": "Fraktsedlar och fakturor" },
+      { "id": "2945", "name": "Järn- och spårvägsmemorabilia" },
+      { "id": "2914", "name": "Klistermärken och stickers" },
+      { "id": "2915", "name": "Knivar och svärd" },
+      { "id": "2916", "name": "Kuriosa" },
+      { "id": "2905", "name": "Kuvert och brevpapper" },
+      { "id": "2917", "name": "Leksaks- och samlarbilar" },
+      { "id": "2919", "name": "Lotter och lottsedlar" },
+      { "id": "2946", "name": "Magneter" },
+      { "id": "2920", "name": "Majblommor" },
+      { "id": "2921", "name": "Medicinska prylar" },
+      { "id": "2922", "name": "Militära samlarsaker" },
+      { "id": "2923", "name": "Mobilia" },
+      { "id": "2924", "name": "Musikmemorabilia" },
+      { "id": "340121", "name": "Nalle- och teddybjörnar" },
+      { "id": "2925", "name": "Nyckelringar" },
+      { "id": "2926", "name": "Olympia" },
+      { "id": "2927", "name": "Pennor och tillbehör" },
+      { "id": "2929", "name": "Pins och nålar" },
+      { "id": "2930", "name": "Plåtemballage" },
+      { "id": "2918", "name": "Priskuranter och kataloger" },
+      { "id": "2931", "name": "Rakning" },
+      { "id": "2932", "name": "Reklamprylar" },
+      { "id": "2933", "name": "Samlarbilder" },
+      { "id": "2909", "name": "Samlarfigurer" },
+      { "id": "2935", "name": "Skyltar" },
+      { "id": "2936", "name": "Sparbössor" },
+      { "id": "2934", "name": "Spelkort" },
+      { "id": "2937", "name": "Sportmemorabilia" },
+      { "id": "2938", "name": "Star Wars" },
+      { "id": "2939", "name": "Technica och nautica" },
+      { "id": "2940", "name": "Telefonkort" },
+      { "id": "2941", "name": "Tidtabeller" },
+      { "id": "2942", "name": "Tobakiana" },
+      { "id": "2949", "name": "Varuförpackningar" },
+      { "id": "2944", "name": "Övriga samlarleksaker" },
+      { "id": "2943", "name": "Övriga samlarsaker" }
+    ]
+  },
+  {
+    "id": "1623",
+    "name": "Allt inom Skor",
+    "subcategories": [
+      { "id": "340303", "name": "Damskor" },
+      { "id": "340304", "name": "Herrskor" },
+      { "id": "343260", "name": "Skovård" },
+      { "id": "162313", "name": "Övriga skoprodukter" }
+    ]
+  },
+  {
+    "id": "340736",
+    "name": "Allt inom Skönhet",
+    "subcategories": [
+      { "id": "302666", "name": "Ansiktsvård" },
+      { "id": "302665", "name": "Hudvård" },
+      { "id": "302673", "name": "Hårvård" },
+      { "id": "302680", "name": "Manikyr, hand- och fotvård" },
+      { "id": "161202", "name": "Parfym och doft" },
+      { "id": "302685", "name": "Smink" },
+      { "id": "340737", "name": "Tandvård" },
+      { "id": "340738", "name": "Övriga skönhetsprodukter" }
+    ]
+  },
+  {
+    "id": "24",
+    "name": "Allt inom Smycken och Ädelstenar",
+    "subcategories": [
+      { "id": "2401", "name": "Armband" },
+      { "id": "2402", "name": "Broscher" },
+      { "id": "341088", "name": "Egendesignade smycken" },
+      { "id": "344443", "name": "Fotlänkar" },
+      { "id": "2403", "name": "Halsband" },
+      { "id": "343282", "name": "Hårsmycken och diadem" },
+      { "id": "240702", "name": "Manschettknappar" },
+      { "id": "2410", "name": "Piercings" },
+      { "id": "2405", "name": "Ringar" },
+      { "id": "240703", "name": "Slipsnålar" },
+      { "id": "1001055", "name": "Smyckeskrin och -förvaring" },
+      { "id": "2409", "name": "Smyckespaket" },
+      { "id": "2413", "name": "Smyckestillbehör" },
+      { "id": "2408", "name": "Ädelstenar" },
+      { "id": "2406", "name": "Örhängen" },
+      { "id": "240704", "name": "Övriga smycken" }
+    ]
+  },
+  {
+    "id": "25",
+    "name": "Allt inom Sport och Fritid",
+    "subcategories": [
+      { "id": "343077", "name": "Alpint" },
+      { "id": "2523", "name": "Amerikansk fotboll" },
+      { "id": "301776", "name": "Badminton" },
+      { "id": "2524", "name": "Baseball" },
+      { "id": "2522", "name": "Basket" },
+      { "id": "301778", "name": "Bordtennis och pingis" },
+      { "id": "301782", "name": "Bowling" },
+      { "id": "343101", "name": "Boxning" },
+      { "id": "2520", "name": "Camping och hiking" },
+      { "id": "1003", "name": "Cykel" },
+      { "id": "343099", "name": "Dart" },
+      { "id": "1001035", "name": "Discgolf" },
+      { "id": "2502", "name": "Fiske" },
+      { "id": "302963", "name": "Fotboll" },
+      { "id": "2505", "name": "Golf" },
+      { "id": "344959", "name": "Gymnastik" },
+      { "id": "302518", "name": "Handboll" },
+      { "id": "2527", "name": "Hockey och skridskor" },
+      { "id": "1616", "name": "Husdjurstillbehör" },
+      { "id": "2508", "name": "Häst och ridsport" },
+      { "id": "302512", "name": "Innebandy" },
+      { "id": "2511", "name": "Jakt" },
+      { "id": "343151", "name": "Kampsport" },
+      { "id": "344951", "name": "Konståkning" },
+      { "id": "343154", "name": "Lek och spel" },
+      { "id": "344666", "name": "Långfärdsskridskor" },
+      { "id": "250901", "name": "Längdåkning" },
+      { "id": "343157", "name": "Löpning" },
+      { "id": "344963", "name": "Padel" },
+      { "id": "344954", "name": "Segling" },
+      { "id": "344955", "name": "Simning" },
+      { "id": "2510", "name": "Skateboard och inlines" },
+      { "id": "301784", "name": "Skytte" },
+      { "id": "301777", "name": "Squash" },
+      { "id": "301775", "name": "Tennis" },
+      { "id": "2503", "name": "Träning" },
+      { "id": "344956", "name": "Tävlingsdans" },
+      { "id": "342720", "name": "Vattensport" },
+      { "id": "343155", "name": "Yoga" },
+      { "id": "302658", "name": "Äventyrssporter" },
+      { "id": "2512", "name": "Övrig sport och fritid" }
+    ]
+  },
+  {
+    "id": "26",
+    "name": "Allt inom Telefoni, Tablets och Wearables",
+    "subcategories": [
+      { "id": "343313", "name": "Fast telefoni" },
+      { "id": "2601", "name": "Mobiltelefoner" },
+      { "id": "2607", "name": "Mobiltillbehör" },
+      { "id": "344291", "name": "Smartwatches" },
+      { "id": "342979", "name": "Surfplattor" },
+      { "id": "340125", "name": "Övrig telefoni" }
+    ]
+  },
+  {
+    "id": "1605",
+    "name": "Allt inom Trädgård och Växter",
+    "subcategories": [
+      { "id": "1000237", "name": "Bevattning" },
+      { "id": "344646", "name": "Konstgjorda växter" },
+      { "id": "1000163", "name": "Krukor och odlingssystem" },
+      { "id": "1000201", "name": "Trädgårdsdekorationer" },
+      { "id": "1000235", "name": "Trädgårdshandskar och -kläder" },
+      { "id": "1000177", "name": "Trädgårdsmaskiner" },
+      { "id": "160503", "name": "Trädgårdsredskap" },
+      { "id": "1000130", "name": "Växter och frön" },
+      { "id": "1000169", "name": "Växthus och drivhus" },
+      { "id": "160506", "name": "Övrigt till trädgård" }
+    ]
+  },
+  {
+    "id": "30",
+    "name": "Allt inom TV-spel och Datorspel",
+    "subcategories": [
+      { "id": "3011", "name": "Datorspel" },
+      { "id": "3019", "name": "Litteratur och merchandise" },
+      { "id": "1000458", "name": "NFC-figurer" },
+      { "id": "1000423", "name": "Nintendo" },
+      { "id": "1000434", "name": "PlayStation" },
+      { "id": "3005", "name": "Retro TV-spel och pocketspel" },
+      { "id": "1000435", "name": "Sega" },
+      { "id": "1000437", "name": "Xbox" },
+      { "id": "3018", "name": "Övrigt dator- och TV-spel" }
+    ]
+  },
+  {
+    "id": "27",
+    "name": "Allt inom Vykort och Bilder",
+    "subcategories": [
+      { "id": "1001177", "name": "Album och tillbehör" },
+      { "id": "2702", "name": "Allmänna motiv" },
+      { "id": "1001231", "name": "Nordiska länder" },
+      { "id": "2701", "name": "Svenska landskap" },
+      { "id": "2703", "name": "Världen utom Norden" }
+    ]
+  },
+  {
+    "id": "28",
+    "name": "Allt inom Övrigt",
+    "subcategories": [
+      { "id": "344360", "name": "Affärsverksamhet" },
+      { "id": "top", "name": "1001163:Allt på bilden" },
+      { "id": "2801", "name": "Bostäder och Lokaler" },
+      { "id": "344477", "name": "Domännamn" },
+      { "id": "302594", "name": "Frakt och Förpackning" },
+      { "id": "1001167", "name": "Hjälpmedel" },
+      { "id": "2804", "name": "Specialannonser" },
+      { "id": "344480", "name": "Testauktioner" },
+      { "id": "2802", "name": "Varupartier" },
+      { "id": "2805", "name": "Övrigt" }
+    ]
+  }
+]
