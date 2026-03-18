@@ -28,6 +28,7 @@ interface AdData {
   Moms: string;
   Lagersaldo: string;
   ResearchReport?: string;
+  produktnamn: string;
 }
 
 interface Job {
@@ -74,6 +75,7 @@ const DEFAULT_AD: AdData = {
   'Vald sluttid': '',
   Moms: '',
   Lagersaldo: '1',
+  produktnamn: '',
 };
 
 export default function App() {
@@ -151,7 +153,7 @@ export default function App() {
           reader.readAsDataURL(blob);
         });
 
-        const parts = [
+         const parts = [
           { inlineData: { data: base64Data, mimeType: blob.type || 'image/jpeg' } },
           { text: `Du är en expert på att skapa säljande annonser för e-handel och auktionssajter (som Tradera).
 Skapa en annons baserat på de bifogade bilderna och följande extra information: "${job.payload.description || 'Ingen extra information'}".
@@ -173,12 +175,13 @@ Returnera resultatet som ett JSON-objekt med följande fält (använd exakt dess
   - Storlek (ID 1): Exempel: "1:M".
   Slå ihop dem så här: "1:M;2:svart,vit;3:Nike;121:Gott skick".
 - "Annonstyp": Välj "Auction" eller "FixedPrice".
+- "produktnamn": Ett kort och precist produktnamn utan extra detaljer (används för sökning på Tradera). Exempel: "Logitech MX Master" (ej "Logitech MX Master 3 Trådlös Mus").
 
 Svara ENDAST med giltig JSON, inga markdown-block eller annan text.` }
         ];
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3-flash-preview',
+          model: 'gemini-2.5-flash',
           contents: { parts },
           config: { responseMimeType: 'application/json' }
         });
@@ -191,16 +194,36 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.` }
           body: JSON.stringify({ result: generatedData })
         });
 
-      } else if (job.type === 'research') {
-        const prompt = `Sök på tradera.com efter sålda och listade objekt som liknar följande: "${job.payload.rubrik}" - "${job.payload.beskrivning}". 
-Ta reda på om samma eller liknande objekt har sålts och till vilket pris. 
-Generera en rapport i markdown-format med rekommendation på prissättning. 
-Hänvisa till de hittade annonserna, inkludera inbäddad bild för varje hittad annons och länk till annonsen på tradera.`;
+       } else if (job.type === 'research') {
+        // Step 1: Fetch Tradera search results using our server-side API
+        const searchRes = await fetch(`/api/tradera/search?q=${encodeURIComponent(job.payload.produktnamn)}`);
+        const searchData = await searchRes.json();
+
+        if (!searchRes.ok) {
+          throw new Error(searchData.error || 'Failed to fetch search results');
+        }
+
+        const prompt = `Analysera följande sökresultat från Tradera för "${job.payload.produktnamn}". 
+Sökresultat: ${JSON.stringify(searchData.searchResults)}
+
+Fullständig HTML för verifiering: ${searchData.html}
+
+Vänligen generera en rapport i markdown-format med:
+1. En sammanfattning av prisintervallet för det sökta objektet
+2. Rekommendation på prissättning baserat på de hittade annonserna
+3. En lista över de hittade annonserna med:
+   - Titel
+   - Pris
+   - Bildurl
+   - Länk till annonsen
+
+Använd markdown-format för att göra rapporten läsbar och inkludera bilder direkt i rapporten med markdown-syntax.`;
+
+        console.log('Research prompt sent to AI:', prompt);
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.1-pro-preview',
-          contents: prompt,
-          config: { tools: [{ googleSearch: {} }] }
+          model: 'gemini-2.5-flash',
+          contents: prompt
         });
 
         await fetch(`/api/jobs/${job.id}/success`, {
@@ -308,6 +331,7 @@ Returnera resultatet som ett JSON-objekt med följande fält (använd exakt dess
   - Storlek (ID 1): Exempel: "1:M".
   Slå ihop dem så här: "1:M;2:svart,vit;3:Nike;121:Gott skick".
 - "Annonstyp": Välj "Auction" eller "FixedPrice".
+- "produktnamn": Ett kort och precist produktnamn utan extra detaljer (används för sökning på Tradera). Exempel: "Logitech MX Master" (ej "Logitech MX Master 3 Trådlös Mus").
 
 Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
 `;
@@ -324,7 +348,7 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
       const ai = new GoogleGenAI({ apiKey: configData.geminiApiKey });
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.5-flash',
         contents: { parts },
         config: {
           responseMimeType: 'application/json'
@@ -349,14 +373,22 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
   };
 
   const researchAd = async () => {
-    if (!currentAd.Rubrik) {
-      alert('Vänligen generera eller fyll i en rubrik först.');
+    if (!currentAd.produktnamn) {
+      alert('Vänligen generera eller fyll i ett produktnamn först.');
       return;
     }
 
     setIsResearching(true);
     setResearchReport(null);
     try {
+      // Step 1: Fetch Tradera search results using our server-side API
+      const searchRes = await fetch(`/api/tradera/search?q=${encodeURIComponent(currentAd.produktnamn)}`);
+      const searchData = await searchRes.json();
+
+      if (!searchRes.ok) {
+        throw new Error(searchData.error || 'Failed to fetch search results');
+      }
+
       const configRes = await fetch('/api/config');
       const configData = await configRes.json();
       
@@ -366,17 +398,27 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
 
       const ai = new GoogleGenAI({ apiKey: configData.geminiApiKey });
 
-      const prompt = `Sök på tradera.com efter sålda och listade objekt som liknar följande: "${currentAd.Rubrik}" - "${currentAd.Beskrivning}". 
-Ta reda på om samma eller liknande objekt har sålts och till vilket pris. 
-Generera en rapport i markdown-format med rekommendation på prissättning. 
-Hänvisa till de hittade annonserna, inkludera inbäddad bild för varje hittad annons och länk till annonsen på tradera.`;
+      const prompt = `Analysera följande sökresultat från Tradera för "${currentAd.produktnamn}". 
+Sökresultat: ${JSON.stringify(searchData.searchResults)}
+
+Fullständig HTML för verifiering: ${searchData.html}
+
+Vänligen generera en rapport i markdown-format med:
+1. En sammanfattning av prisintervallet för det sökta objektet
+2. Rekommendation på prissättning baserat på de hittade annonserna
+3. En lista över de hittade annonserna med:
+   - Titel
+   - Pris
+   - Bildurl
+   - Länk till annonsen
+
+Använd markdown-format för att göra rapporten läsbar och inkludera bilder direkt i rapporten med markdown-syntax.`;
+
+      console.log('Research prompt sent to AI:', prompt);
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
-        contents: prompt,
-        config: {
-          tools: [{ googleSearch: {} }],
-        }
+        model: 'gemini-2.5-flash',
+        contents: prompt
       });
 
       setResearchReport(response.text || 'Kunde inte generera rapport.');
@@ -803,7 +845,7 @@ Hänvisa till de hittade annonserna, inkludera inbäddad bild för varje hittad 
                       const jobs = adsToResearch.map(ad => ({
                         type: 'research',
                         adId: ad.id,
-                        payload: { rubrik: ad.Rubrik, beskrivning: ad.Beskrivning }
+                        payload: { produktnamn: ad.produktnamn, beskrivning: ad.Beskrivning }
                       }));
                       await fetch('/api/jobs', {
                         method: 'POST',

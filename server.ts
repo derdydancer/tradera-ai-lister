@@ -6,6 +6,7 @@ import multer from 'multer';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
 import 'dotenv/config';
+import puppeteer from 'puppeteer';
 
 async function startServer() {
   console.log(`[Server] Starting server process...`);
@@ -115,6 +116,88 @@ async function startServer() {
     res.json({
       geminiApiKey: process.env.GEMINI_API_KEY || '',
     });
+  });
+
+  // API endpoint to fetch Tradera search results
+  app.get('/api/tradera/search', async (req, res) => {
+    const { q } = req.query;
+    
+    if (!q) {
+      return res.status(400).json({ error: 'Search query is required' });
+    }
+
+    try {
+      const searchQuery = String(q);
+      const url = `https://www.tradera.com/search?q=${encodeURIComponent(searchQuery)}&itemStatus=Sold`;
+      console.log(`[Server] Fetching Tradera search results from: ${url}`);
+
+      const browser = await puppeteer.launch({ 
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      const page = await browser.newPage();
+      
+      // Set user agent to avoid being blocked
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+      
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+
+      // Wait for item cards to load
+      await page.waitForSelector('[data-sentry-component="ItemCardGridItem"]', { timeout: 10000 });
+
+      // Extract all item cards
+      const searchResults = await page.evaluate(() => {
+        const items = [];
+        const itemCards = document.querySelectorAll('[data-sentry-component="ItemCardGridItem"]');
+        
+        itemCards.forEach(card => {
+          // Get image
+          const img = card.querySelector('img');
+          const imageUrl = img ? img.src : '';
+
+          // Get price
+          const priceElement = card.querySelector('[data-testid="price"]');
+          const price = priceElement ? priceElement.textContent?.trim() : '';
+
+          // Get item link
+          const linkElement = card.querySelector('a');
+          const itemUrl = linkElement ? linkElement.href : '';
+
+          // Get item title
+          const titleElement = card.querySelector('h3');
+          const title = titleElement ? titleElement.textContent?.trim() : '';
+
+          items.push({
+            title,
+            price,
+            imageUrl,
+            itemUrl
+          });
+        });
+
+        return items;
+      });
+
+      // Get the full HTML before closing the browser
+      const fullHtml = await page.content();
+      
+      await browser.close();
+
+      console.log(`[Server] Found ${searchResults.length} search results`);
+      
+      res.json({
+        searchResults,
+        html: fullHtml,
+        url
+      });
+
+    } catch (error: any) {
+      console.error('[Server] Failed to fetch Tradera search results:', error);
+      res.status(500).json({
+        error: 'Failed to fetch search results',
+        details: error.message
+      });
+    }
   });
 
   // Jobs Endpoints
