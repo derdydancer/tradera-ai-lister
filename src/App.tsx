@@ -66,16 +66,22 @@ export default function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    console.log('[Client] App component mounted. Fetching ads...');
     fetchAds();
   }, []);
 
   const fetchAds = async () => {
     try {
+      console.log('[Client] Fetching ads from /api/ads...');
       const res = await fetch('/api/ads');
+      if (!res.ok) {
+        console.error(`[Client] API error fetching ads: ${res.status} ${res.statusText}`);
+      }
       const data = await res.json();
+      console.log(`[Client] Successfully fetched ${data.length} ads.`);
       setAds(data);
     } catch (error) {
-      console.error('Failed to fetch ads:', error);
+      console.error('[Client] Failed to fetch ads:', error);
     }
   };
 

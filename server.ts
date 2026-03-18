@@ -8,11 +8,21 @@ import { v4 as uuidv4 } from 'uuid';
 import 'dotenv/config';
 
 async function startServer() {
+  console.log(`[Server] Starting server process...`);
+  console.log(`[Server] NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`[Server] Current working directory: ${process.cwd()}`);
+  
   const app = express();
   const PORT = 3000;
 
   app.use(cors());
   app.use(express.json());
+
+  // Request logging middleware
+  app.use((req, res, next) => {
+    console.log(`[Server] ${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+  });
 
   // Ensure data directory exists
   const DATA_DIR = path.join(process.cwd(), 'data');
@@ -109,6 +119,20 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
+    console.log(`[Server] Running in production mode.`);
+    console.log(`[Server] Serving static files from: ${distPath}`);
+    
+    if (fs.existsSync(distPath)) {
+      console.log(`[Server] dist directory exists. Contents:`, fs.readdirSync(distPath));
+      if (fs.existsSync(path.join(distPath, 'index.html'))) {
+        console.log(`[Server] dist/index.html found.`);
+      } else {
+        console.error(`[Server] ERROR: dist/index.html is missing!`);
+      }
+    } else {
+      console.error(`[Server] ERROR: dist directory is missing! Make sure to run 'npm run build' before starting the server.`);
+    }
+
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));

@@ -4,7 +4,10 @@ import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
+  console.log(`[Vite Build] Starting build/dev process in mode: ${mode}`);
   const env = loadEnv(mode, '.', '');
+  console.log(`[Vite Build] Loaded environment variables. GEMINI_API_KEY present: ${!!env.GEMINI_API_KEY}`);
+  
   return {
     base: './',
     plugins: [react(), tailwindcss()],
