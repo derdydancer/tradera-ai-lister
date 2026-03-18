@@ -29,8 +29,6 @@ interface AdData {
 
 import { GoogleGenAI } from '@google/genai';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 const DEFAULT_AD: AdData = {
   Rubrik: '',
   Beskrivning: '',
@@ -152,6 +150,15 @@ Svara ENDAST med giltig JSON, inga markdown-block eller annan text.
 `;
 
       parts.push({ text: prompt });
+
+      const configRes = await fetch('/api/config');
+      const configData = await configRes.json();
+      
+      if (!configData.geminiApiKey) {
+        throw new Error('API key not found on server');
+      }
+
+      const ai = new GoogleGenAI({ apiKey: configData.geminiApiKey });
 
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',

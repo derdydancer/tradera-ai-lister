@@ -94,6 +94,12 @@ async function startServer() {
     res.json({ urls });
   });
 
+  app.get('/api/config', (req, res) => {
+    res.json({
+      geminiApiKey: process.env.GEMINI_API_KEY || '',
+    });
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
